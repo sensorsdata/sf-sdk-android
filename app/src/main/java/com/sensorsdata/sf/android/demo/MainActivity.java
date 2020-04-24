@@ -70,16 +70,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.btn_picture:
                 //PopDialogUtils.getInstance().pictureDialog(this);
-                //SensorsDataAPI.sharedInstance().track("$WebClick");
+                SensorsDataAPI.sharedInstance().track("$WebClick");
                 break;
             case R.id.btn_2button:
-               // PopDialogUtils.getInstance().picture2ButtonDialog(this);
+                PopDialogUtils.getInstance().picture2ButtonDialog(this);
                 break;
             case R.id.btn_picture_2button:
-                //PopDialogUtils.getInstance().picture2Button2Dialog(this);
+                PopDialogUtils.getInstance().picture2Button2Dialog(this);
                 break;
             case R.id.btn_pictureButton:
-                //SensorsDataAPI.sharedInstance().track("$WebStay");
+                SensorsDataAPI.sharedInstance().track("$WebStay");
                 //PopDialogUtils.getInstance().pictureButtonDialog(this);
                 break;
             case R.id.btn_text_button:

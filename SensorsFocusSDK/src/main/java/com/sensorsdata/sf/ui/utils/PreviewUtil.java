@@ -53,7 +53,7 @@ public class PreviewUtil {
 
                     @Override
                     public void onFailure(HttpCall httpCall, ResponseBody responseBody) {
-
+                        SFLog.d(TAG, "showPreview fail " + responseBody.toString());
                     }
                 });
             }

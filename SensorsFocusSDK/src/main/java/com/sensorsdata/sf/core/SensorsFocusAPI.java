@@ -20,6 +20,8 @@ package com.sensorsdata.sf.core;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
+import android.widget.TextView;
 
 import com.sensorsdata.analytics.android.sdk.BuildConfig;
 import com.sensorsdata.analytics.android.sdk.SALog;
@@ -35,6 +37,7 @@ import com.sensorsdata.sf.ui.view.DynamicViewJsonBuilder;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -226,14 +229,19 @@ public class SensorsFocusAPI implements ISensorsFocusAPI {
     private static boolean checkSAVersion() {
         try {
             final String requiredVersion = "4.0.3";
-            String version = BuildConfig.SDK_VERSION;
+            SensorsDataAPI sensorsDataAPI = SensorsDataAPI.sharedInstance();
+            Field field = sensorsDataAPI.getClass().getDeclaredField("VERSION");
+            field.setAccessible(true);
+            String version = (String) field.get(sensorsDataAPI);
             String compareVersion = version;
-            if (version.contains("-")) {
-                compareVersion = compareVersion.substring(0, compareVersion.indexOf("-"));
-            }
-            if (!Utils.isVersionValid(compareVersion, requiredVersion)) {
-                SFLog.e(TAG, "当前神策 Android 埋点 SDK 版本 " + version + " 过低，请升级至 " + requiredVersion + " 及其以上版本后进行使用");
-                return false;
+            if (!TextUtils.isEmpty(version)) {
+                if (version.contains("-")) {
+                    compareVersion = compareVersion.substring(0, compareVersion.indexOf("-"));
+                }
+                if (!Utils.isVersionValid(compareVersion, requiredVersion)) {
+                    SFLog.e(TAG, "当前神策 Android 埋点 SDK 版本 " + version + " 过低，请升级至 " + requiredVersion + " 及其以上版本后进行使用");
+                    return false;
+                }
             }
             return true;
         } catch (Exception ex) {

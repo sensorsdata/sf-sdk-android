@@ -47,6 +47,7 @@ public class DynamicViewJsonBuilder {
     private boolean mIsControlGroup;
     // 图片加载是否成功
     private boolean mImageSucceed = true;
+    private String errorUrl;
     private boolean mViewCreatedSucceed = true;
     static boolean dialogIsShowing = false;
     private Context mContext;
@@ -173,6 +174,7 @@ public class DynamicViewJsonBuilder {
             if (dialogIsShowing && !isPreview) {//如果老弹窗已经展示，并且不是测试发送，新弹窗不用展示
                 return null;
             }
+            errorUrl = "";
             JSONObject propertyJson = viewJson.optJSONObject(UIProperty.properties);
             JSONObject templateJson = viewJson.optJSONObject(UIProperty.template);
             if (templateJson != null) {
@@ -185,19 +187,22 @@ public class DynamicViewJsonBuilder {
 
             // 标记当前 View 没有创建成功
             mViewCreatedSucceed = false;
+            String errorMessage;
             if (!mImageSucceed) {
                 TipUtils.setErrorCode(TipUtils.IMAGE_LOAD_FAILED);
+                errorMessage = TipUtils.getErrorMessage() + " " + errorUrl;
             } else {
                 TipUtils.setErrorCode(TipUtils.JSON_ERROR);
+                errorMessage = TipUtils.getErrorMessage();
             }
             // 执行到此处，说明已经加载失败，失败也要进行埋点
             if (mIsControlGroup) {
                 SFTrackHelper.trackPlanPopupDisplay(this.mTitle, this.mContent, this.mImageUrl, false, "对照组", mJsonPlan);
             } else {
-                SFTrackHelper.trackPlanPopupDisplay(this.mTitle, this.mContent, this.mImageUrl, false, TipUtils.getErrorMessage(), mJsonPlan);
+                SFTrackHelper.trackPlanPopupDisplay(this.mTitle, this.mContent, this.mImageUrl, false, errorMessage, mJsonPlan);
                 PopupListener popupListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getWindowListener();
                 if (popupListener != null) {
-                    popupListener.onPopupLoadFailed(String.valueOf(mPlanId), TipUtils.getErrorCode(), TipUtils.getErrorMessage());
+                    popupListener.onPopupLoadFailed(String.valueOf(mPlanId), TipUtils.getErrorCode(), errorMessage);
                 }
             }
         } catch (Exception ex) {
@@ -288,6 +293,7 @@ public class DynamicViewJsonBuilder {
                 if (TextUtils.isEmpty(TipUtils.getErrorMessage())) {
                     // 如果不是网络原因，还是失败了，则是图片加载失败
                     TipUtils.setErrorCode(TipUtils.IMAGE_LOAD_FAILED);
+                    errorUrl = imageViewDynamic.getImageUrl();
                 }
             }
             return imageViewDynamic;

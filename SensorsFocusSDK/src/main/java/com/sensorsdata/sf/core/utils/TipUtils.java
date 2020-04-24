@@ -34,7 +34,7 @@ public class TipUtils {
     public static String getErrorMessage() {
         switch (errorCode) {
             case IMAGE_LOAD_FAILED:
-                return "图片加载失败，请重新扫码";
+                return "图片加载失败";
             case JSON_ERROR:
                 return "预览信息解析失败，请检查计划配置";
         }

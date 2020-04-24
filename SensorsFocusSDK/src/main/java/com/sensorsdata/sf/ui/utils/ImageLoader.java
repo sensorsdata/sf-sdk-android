@@ -63,7 +63,7 @@ public class ImageLoader {
                 mDiskLruCache = DiskLruCache.open(cacheFile, 1, 1, 10 * 1024 * 1024);
                 executorService = Executors.newSingleThreadExecutor();
             } catch (Exception ex) {
-                // ignore
+                SFLog.printStackTrace(ex);
             }
         }
     }
@@ -85,11 +85,13 @@ public class ImageLoader {
         try {
             Bitmap bitmap = mBitmapCache.get(url);
             if (bitmap != null) {
+                SFLog.d(TAG, "「 " + url + "」loadBitmap from cache succeed.");
                 return bitmap;
             }
 
             bitmap = loadBitmapFromDisk(url);
             if (bitmap != null) {
+                SFLog.d(TAG, "「 " + url + "」loadBitmap from disk succeed.");
                 mBitmapCache.put(url, bitmap);
                 return bitmap;
             }
@@ -97,11 +99,14 @@ public class ImageLoader {
             Future<Bitmap> bitmapFuture = executorService.submit(new LoaderTask(url));
             bitmap = bitmapFuture.get();
             if (bitmap != null) {
+                SFLog.d(TAG, "「 " + url + "」loadBitmap from network succeed.");
                 mBitmapCache.put(url, bitmap);
+            } else {
+                SFLog.d(TAG, "「 " + url + "」loadBitmap from network failed.");
             }
             return bitmap;
         } catch (Exception ex) {
-            // ignore
+            SFLog.printStackTrace(ex);
         }
         return null;
     }
@@ -126,7 +131,7 @@ public class ImageLoader {
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.connect();
                 int responseCode = httpURLConnection.getResponseCode();
-                SFLog.d(TAG, "ImageLoader 【 HttpUrl = " + httpUrl + " ,Code = " + responseCode);
+                SFLog.d(TAG, "HttpUrl = " + httpUrl + " ,Code = " + responseCode);
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     inputStream = httpURLConnection.getInputStream();
                     byte[] data = readStream(inputStream);
@@ -144,7 +149,7 @@ public class ImageLoader {
                     try {
                         inputStream.close();
                     } catch (IOException e) {
-                        //ignore
+                        SFLog.printStackTrace(e);
                     }
                 }
             }
@@ -167,7 +172,7 @@ public class ImageLoader {
             }
             mDiskLruCache.flush();
         } catch (Exception ex) {
-            // ignore
+            SFLog.printStackTrace(ex);
         }
     }
 
@@ -182,7 +187,7 @@ public class ImageLoader {
                 return BitmapFactory.decodeStream(snapshot.getInputStream(0));
             }
         } catch (Exception ex) {
-            // ignore
+            SFLog.printStackTrace(ex);
         }
         return null;
     }

@@ -20,7 +20,6 @@ package com.sensorsdata.sf.core.http.internal;
 import android.text.TextUtils;
 
 import com.sensorsdata.sf.core.utils.SFLog;
-import com.sensorsdata.sf.core.utils.TipUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
@@ -109,6 +108,7 @@ public class HttpCall implements Runnable {
             SFLog.d(TAG, "Server URL = " + httpUrl + " 无效，请重新设置");
             handleException(responseBody, httpURLConnection, ex);
         } catch (Exception ex) {
+            SFLog.printStackTrace(ex);
             handleException(responseBody, httpURLConnection, ex);
         }
         return responseBody;
@@ -171,7 +171,7 @@ public class HttpCall implements Runnable {
                     bufferedOutputStream.close();
                 }
             } catch (Exception ex) {
-                //ignore
+                SFLog.printStackTrace(ex);
             }
         }
     }
