@@ -115,6 +115,15 @@ public class SensorsFocusAPI implements ISensorsFocusAPI {
         return null;
     }
 
+    PopupListener internalWindowListener;
+    public void setInternalWindowListener(PopupListener popupListener){
+        this.internalWindowListener = popupListener;
+    }
+
+    public PopupListener getInternalWindowListener() {
+        return internalWindowListener;
+    }
+
     /**
      * 获取 SensorsFocusAPI 实例
      *

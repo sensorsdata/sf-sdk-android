@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.sf.core.SensorsFocusAPI;
 import com.sensorsdata.sf.core.utils.SFLog;
 import com.sensorsdata.sf.ui.listener.PopupListener;
@@ -177,6 +178,10 @@ class DynamicViewHelper {
                                 if (mPopupListener != null) {
                                     mPopupListener.onPopupClose(String.valueOf(mPlanId));
                                 }
+                                PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
+                                if (internalWindowListener != null) {
+                                    internalWindowListener.onPopupClose(String.valueOf(mPlanId));
+                                }
                                 JSONObject maskJson = new JSONObject();
                                 maskJson.put(UIProperty.sf_close_type, "POPUP_CLOSE_MASK");
                                 maskJson.put("id", maskViewDynamic.getActionId());
@@ -211,6 +216,10 @@ class DynamicViewHelper {
                     if (mPopupListener != null) {
                         mPopupListener.onPopupClose(String.valueOf(mPlanId));
                     }
+                    PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
+                    if (internalWindowListener != null) {
+                        internalWindowListener.onPopupClose(String.valueOf(mPlanId));
+                    }
                     activity.finish();
                     break;
                 case UIProperty.action_type_copy:
@@ -226,6 +235,10 @@ class DynamicViewHelper {
                     if (mPopupListener != null) {
                         mPopupListener.onPopupClick(String.valueOf(mPlanId), getActionModel(actionJson));
                         mPopupListener.onPopupClose(String.valueOf(mPlanId));
+                    }
+                    internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
+                    if (internalWindowListener != null) {
+                        internalWindowListener.onPopupClose(String.valueOf(mPlanId));
                     }
                     activity.finish();
                     break;

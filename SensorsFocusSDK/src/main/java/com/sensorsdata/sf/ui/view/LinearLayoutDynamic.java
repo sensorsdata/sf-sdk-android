@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.sensorsdata.sf.core.utils.SFLog;
+import com.sensorsdata.sf.ui.utils.SizeUtil;
 import com.sensorsdata.sf.ui.widget.SFLinearLayout;
 import com.sensorsdata.sf.ui.widget.SFTextView;
 
@@ -91,13 +92,13 @@ final class LinearLayoutDynamic extends AbstractViewDynamic {
                 }
                 if (isOuterView) {
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
-                    layoutParams.gravity = align;
+                    layoutParams.gravity = Gravity.CENTER;
                     if (jsonObject != null) {
                         layoutParams.setMargins(
-                                realSize(mContext, jsonObject.optString(UIProperty.left)),
-                                realSize(mContext, jsonObject.optString(UIProperty.top)),
-                                realSize(mContext, jsonObject.optString(UIProperty.right)),
-                                realSize(mContext, jsonObject.optString(UIProperty.bottom)));
+                                0,
+                                SizeUtil.dip2px(mContext, -15),
+                                0,
+                                0);
                     }
                     mView.setLayoutParams(layoutParams);
                 } else {

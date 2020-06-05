@@ -181,6 +181,10 @@ public class DynamicViewJsonBuilder {
                 LinearLayoutDynamic linearLayoutDynamic = createSubView(context, templateJson, true);
                 if (!mIsControlGroup && linearLayoutDynamic != null && mImageSucceed) {// View 创建成功，并且图片没有加载失败，并且不是对照组
                     SFTrackHelper.trackPlanPopupDisplay(this.mTitle, this.mContent, this.mImageUrl, true, "", mJsonPlan);
+                    PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
+                    if (internalWindowListener != null) {
+                        internalWindowListener.onPopupLoadSuccess(String.valueOf(mPlanId));
+                    }
                     return handleMaskLayout(context, linearLayoutDynamic, propertyJson);
                 }
             }
@@ -203,6 +207,10 @@ public class DynamicViewJsonBuilder {
                 PopupListener popupListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getWindowListener();
                 if (popupListener != null) {
                     popupListener.onPopupLoadFailed(String.valueOf(mPlanId), TipUtils.getErrorCode(), errorMessage);
+                }
+                PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
+                if (internalWindowListener != null) {
+                    internalWindowListener.onPopupLoadFailed(String.valueOf(mPlanId), TipUtils.getErrorCode(), errorMessage);
                 }
             }
         } catch (Exception ex) {

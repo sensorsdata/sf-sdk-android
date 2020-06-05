@@ -46,7 +46,7 @@ public class MyApplication extends Application {
      */
     private void initSensorsDataAPI() {
         // 数据接收的 URL
-        final String SA_SERVER_URL = "http://10.42.40.99:8106/sa?project=Android";
+        final String SA_SERVER_URL = "https://demosink.focus.sensorsdata.cn/sa?project=default";
 
         //设置 SAConfigOptions，传入数据接收地址 SA_SERVER_URL
         SAConfigOptions saConfigOptions = new SAConfigOptions(SA_SERVER_URL);
@@ -64,7 +64,7 @@ public class MyApplication extends Application {
     }
 
     private void initSensorsFocusApi() {
-        final String apiBaseUrl = "http://10.42.189.228:8141";
+        final String apiBaseUrl = "https://demosfo.focus.sensorsdata.cn/api/v2";
         SensorsFocusAPI.startWithConfigOptions(this, new SFConfigOptions(apiBaseUrl)
                 .setPopupListener(new PopupListener() {
                     /**

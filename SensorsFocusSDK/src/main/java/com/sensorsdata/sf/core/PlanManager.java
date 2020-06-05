@@ -27,7 +27,9 @@ import com.sensorsdata.sf.core.entity.PatternPopup;
 import com.sensorsdata.sf.core.entity.PopupPlan;
 import com.sensorsdata.sf.core.utils.PropertyExpression;
 import com.sensorsdata.sf.core.utils.SFLog;
+import com.sensorsdata.sf.ui.listener.PopupListener;
 import com.sensorsdata.sf.ui.view.DynamicViewJsonBuilder;
+import com.sensorsdata.sf.ui.view.SensorsFocusActionModel;
 
 import org.json.JSONObject;
 
@@ -37,12 +39,12 @@ import java.util.UUID;
 class PlanManager {
     private static final String TAG = "PlanManager";
 
-    static void TriggerPopupPlans(GlobalData globalData, Context context, List<PopupPlan> pps, JSONObject jsonObject, AppStateManager appStateManager) {
+    static void TriggerPopupPlans(final GlobalData globalData, Context context, List<PopupPlan> pps, JSONObject jsonObject, AppStateManager appStateManager) {
         SFLog.d(TAG, jsonObject.toString());
         //标记某个弹窗被触发或显示，优先级高的弹窗计划被触发，其他计划要走优先级抑制过程
         boolean isTriggerPopupPlan = false;
         boolean isShouldSaveData = false;
-        for (PopupPlan p : pps) {
+        for (final PopupPlan p : pps) {
             SFLog.d(TAG, "****** Start Trigger Popup Plan ******");
             SFLog.d(TAG, p.toString());
             //检查是否受众
@@ -159,7 +161,7 @@ class PlanManager {
                 continue;
             }
 
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
 
             //16 全局弹窗限制判断，不满足则结束流程。注意，全局弹窗限制，均为 “自然” 窗口。
             if (globalData.globalPopupLimit != null && globalData.globalPopupLimit.isInUse && p.enableGlobalMsgLimit) {
@@ -197,6 +199,36 @@ class PlanManager {
             SFLog.d(TAG, "Window will showing.");
             //这块已经和士伟沟通了，由士伟决定对照组是否弹窗
             new DynamicViewJsonBuilder(context, String.valueOf(p.planId)).showDialog();
+            ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).setInternalWindowListener(new PopupListener() {
+                @Override
+                public void onPopupLoadSuccess(String planId) {
+
+                }
+
+                @Override
+                public void onPopupLoadFailed(String planId, int errorCode, String errorMessage) {
+
+                }
+
+                @Override
+                public void onPopupClick(String planId, SensorsFocusActionModel actionModel) {
+
+                }
+
+                @Override
+                public void onPopupClose(String planId) {
+                    long currentTimeMillis = System.currentTimeMillis();
+                    //开始全局间隔窗口，区间为 [now, now + 间隔时长]
+                    if (globalData.globalIntervalWindow != null) {
+                        globalData.globalIntervalWindow.setStartTime(currentTimeMillis);
+                    }
+
+                    //开始间隔窗口，区间为 [now, now + 间隔时长]
+                    if (p.planIntervalWindow != null) {
+                        p.planIntervalWindow.setStartTime(currentTimeMillis);
+                    }
+                }
+            });
 
             JSONObject reEntry = new JSONObject();
             try {
