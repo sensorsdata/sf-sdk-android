@@ -76,6 +76,7 @@ public class DialogActivity extends Activity {
             }
             DynamicViewHelper dynamicViewHelper = new DynamicViewHelper(planId, jsonPlan);
             AbstractViewDynamic viewDynamic = dynamicViewHelper.getViewDynamic(uuid);
+            dynamicViewHelper.removeViewDynamic(uuid);
             if (viewDynamic instanceof MaskViewDynamic) {
                 FrameLayout frameLayout = dynamicViewHelper.handleMaskLayout(this, (MaskViewDynamic) viewDynamic);
                 frameLayout.addView(traverseView(dynamicViewHelper, ((MaskViewDynamic) viewDynamic).getChildDynamic()));

@@ -62,7 +62,7 @@ public class SFLog {
         }
     }
 
-    private static void e(String tag, String msg, Throwable tr) {
+    public static void e(String tag, String msg, Throwable tr) {
         try {
             Log.e(tag, msg, tr);
         } catch (Exception e) {

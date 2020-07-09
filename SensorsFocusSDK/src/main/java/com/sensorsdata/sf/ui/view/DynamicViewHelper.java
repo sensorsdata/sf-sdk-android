@@ -24,7 +24,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.sf.core.SensorsFocusAPI;
 import com.sensorsdata.sf.core.utils.SFLog;
 import com.sensorsdata.sf.ui.listener.PopupListener;
@@ -55,6 +54,12 @@ class DynamicViewHelper {
             return viewDynamicHashMap.get(uuid);
         }
         return null;
+    }
+
+    void removeViewDynamic(String uuid) {
+        if (viewDynamicHashMap.containsKey(uuid)) {
+            viewDynamicHashMap.remove(uuid);
+        }
     }
 
     void addViewDynamic(String uuid, AbstractViewDynamic viewDynamic) {
@@ -175,9 +180,6 @@ class DynamicViewHelper {
                         @Override
                         public void onClick(View v) {
                             try {
-                                if (mPopupListener != null) {
-                                    mPopupListener.onPopupClose(String.valueOf(mPlanId));
-                                }
                                 PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
                                 if (internalWindowListener != null) {
                                     internalWindowListener.onPopupClose(String.valueOf(mPlanId));
@@ -186,6 +188,10 @@ class DynamicViewHelper {
                                 maskJson.put(UIProperty.sf_close_type, "POPUP_CLOSE_MASK");
                                 maskJson.put("id", maskViewDynamic.getActionId());
                                 SFTrackHelper.trackPlanPopupClick(mTitle, mContent, UIProperty.type_mask, "", mImageUrl, maskJson, mJsonPlan);
+                                if (mPopupListener != null) {
+                                    mPopupListener.onPopupClick(mPlanId, getActionModel(maskJson));
+                                    mPopupListener.onPopupClose(String.valueOf(mPlanId));
+                                }
                                 activity.finish();
                             } catch (JSONException e) {
                                 SFLog.printStackTrace(e);
@@ -214,6 +220,7 @@ class DynamicViewHelper {
                 case UIProperty.action_type_close:
                     SFTrackHelper.trackPlanPopupClick(mTitle, mContent, element_type, element_content, mImageUrl, actionJson, mJsonPlan);
                     if (mPopupListener != null) {
+                        mPopupListener.onPopupClick(mPlanId, getActionModel(actionJson));
                         mPopupListener.onPopupClose(String.valueOf(mPlanId));
                     }
                     PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();

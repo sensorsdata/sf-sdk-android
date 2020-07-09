@@ -88,11 +88,11 @@ public class SensorsFocusAPI implements ISensorsFocusAPI {
      */
     public static void startWithConfigOptions(Context context, SFConfigOptions sfConfigOptions) {
         if (context == null) {
-            SFLog.e(TAG, "Context should not be null.");
+            SFLog.e(TAG, "Context should not be null.", null);
             return;
         }
         if (sfConfigOptions == null) {
-            SFLog.e(TAG, "SFConfigOptions should not be null.");
+            SFLog.e(TAG, "SFConfigOptions should not be null.", null);
             return;
         }
 

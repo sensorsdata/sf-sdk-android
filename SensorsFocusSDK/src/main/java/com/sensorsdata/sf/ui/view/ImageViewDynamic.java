@@ -105,6 +105,8 @@ final class ImageViewDynamic extends AbstractViewDynamic {
             roundedBitmapDrawable.setAntiAlias(true);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 mView.setBackground(roundedBitmapDrawable);
+            } else {
+                mView.setBackgroundDrawable(roundedBitmapDrawable);
             }
             ((ImageView) mView).setScaleType(ImageView.ScaleType.CENTER_CROP);
         } catch (Exception ex) {
