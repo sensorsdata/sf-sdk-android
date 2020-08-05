@@ -22,11 +22,11 @@ import android.text.TextUtils;
 import com.sensorsdata.sf.core.entity.Condition;
 import com.sensorsdata.sf.core.entity.GlobalData;
 import com.sensorsdata.sf.core.entity.Matcher;
-
 import com.sensorsdata.sf.core.entity.PatternPopup;
 import com.sensorsdata.sf.core.entity.PopupPlan;
 import com.sensorsdata.sf.core.utils.PropertyExpression;
 import com.sensorsdata.sf.core.utils.SFLog;
+import com.sensorsdata.sf.core.utils.TipUtils;
 import com.sensorsdata.sf.ui.listener.PopupListener;
 import com.sensorsdata.sf.ui.view.DynamicViewJsonBuilder;
 import com.sensorsdata.sf.ui.view.SensorsFocusActionModel;
@@ -38,6 +38,8 @@ import java.util.UUID;
 
 class PlanManager {
     private static final String TAG = "PlanManager";
+
+    static boolean loadFailed = false;
 
     static void TriggerPopupPlans(final GlobalData globalData, Context context, List<PopupPlan> pps, JSONObject jsonObject, AppStateManager appStateManager) {
         SFLog.d(TAG, jsonObject.toString());
@@ -183,8 +185,8 @@ class PlanManager {
             isTriggerPopupPlan = true;
 
             if (appStateManager != null) {
-                if (!appStateManager.isAppInForeground()) {
-                    SFLog.d(TAG, "App is background, Don't show window.");
+                if (!appStateManager.isAppInForeground() || appStateManager.isActivityFinishing()) {
+                    SFLog.d(TAG, "App is background, Don't show window. isFinishing = " + appStateManager.isActivityFinishing());
                     continue;
                 }
             }
@@ -196,18 +198,18 @@ class PlanManager {
                 p.convertWindow.setUUID(uuid);
             }
 
-            SFLog.d(TAG, "Window will showing.");
-            //这块已经和士伟沟通了，由士伟决定对照组是否弹窗
-            new DynamicViewJsonBuilder(context, String.valueOf(p.planId)).showDialog();
             ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).setInternalWindowListener(new PopupListener() {
                 @Override
                 public void onPopupLoadSuccess(String planId) {
-
+                    loadFailed = false;
                 }
 
                 @Override
                 public void onPopupLoadFailed(String planId, int errorCode, String errorMessage) {
-
+                    SFLog.d(TAG, "onPopupLoadFailed, planId=" + planId + "，errorCode=" + errorCode);
+                    if (errorCode == TipUtils.ACTIVITY_IN_BACKGROUND_FINISH) {
+                        loadFailed = true;
+                    }
                 }
 
                 @Override
@@ -230,6 +232,12 @@ class PlanManager {
                 }
             });
 
+            new DynamicViewJsonBuilder(context, appStateManager, String.valueOf(p.planId)).showDialog();
+            if (loadFailed) {
+                loadFailed = false;
+                continue;
+            }
+            SFLog.d(TAG, "Window will showing.");
             JSONObject reEntry = new JSONObject();
             try {
                 JSONObject convert = new JSONObject();

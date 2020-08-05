@@ -18,6 +18,10 @@
 package com.sensorsdata.sf.ui.view;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -34,6 +38,8 @@ import org.json.JSONObject;
 
 @SensorsDataIgnoreTrackAppViewScreen
 public class DialogActivity extends Activity {
+    private DialogCloseReceiver mCloseReceiver = new DialogCloseReceiver();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +60,12 @@ public class DialogActivity extends Activity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        registerCloseReceiver(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         DynamicViewJsonBuilder.dialogIsShowing = true;
@@ -62,6 +74,7 @@ public class DialogActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        this.unregisterReceiver(mCloseReceiver);
         DynamicViewJsonBuilder.dialogIsShowing = false;
     }
 
@@ -133,5 +146,18 @@ public class DialogActivity extends Activity {
             view = dynamicViewHelper.handleImageView(this, (ImageViewDynamic) viewDynamic);
         }
         return view;
+    }
+
+    private void registerCloseReceiver(Activity activity) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.sensorsdata.sf.close.DialogActivity");
+        activity.registerReceiver(mCloseReceiver, intentFilter);
+    }
+
+    private class DialogCloseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            DialogActivity.this.finish();
+        }
     }
 }

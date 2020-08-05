@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.sensorsdata.sf.core.AppStateManager;
 import com.sensorsdata.sf.core.SensorsFocusAPI;
 import com.sensorsdata.sf.core.entity.GlobalData;
 import com.sensorsdata.sf.core.entity.PopupPlan;
@@ -52,14 +53,16 @@ public class DynamicViewJsonBuilder {
     static boolean dialogIsShowing = false;
     private Context mContext;
     private String mImageUrl;
+    private AppStateManager mAppStateManager;
 
     public DynamicViewJsonBuilder() {
 
     }
 
-    public DynamicViewJsonBuilder(Context context, String planId) {
+    public DynamicViewJsonBuilder(Context context, AppStateManager appStateManager, String planId) {
         try {
             this.mContext = context;
+            this.mAppStateManager = appStateManager;
             mPlanId = planId;
         } catch (Exception ex) {
             // ignore
@@ -72,6 +75,7 @@ public class DynamicViewJsonBuilder {
             if (!TextUtils.isEmpty(mPlanId)) {
                 planId = Long.parseLong(mPlanId);
             }
+
             PopupPlan popupPlan = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getPopupPlan(planId);
             mJsonPlan = SFTrackHelper.buildPlanProperty(popupPlan);
             if (popupPlan != null) {
@@ -118,6 +122,14 @@ public class DynamicViewJsonBuilder {
 
     private void startDialogActivity(String uuid) {
         try {
+            if (mAppStateManager != null && (!mAppStateManager.isAppInForeground() || mAppStateManager.isActivityFinishing())) {
+                // Activity 不在前台时或者当前一个 Activity 正在销毁时
+                SFLog.d(TAG, "App is background or isFinishing = " + mAppStateManager.isActivityFinishing() + " don't show window.");
+                ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener().onPopupLoadFailed(mPlanId, TipUtils.ACTIVITY_IN_BACKGROUND_FINISH, "");
+                return;
+            }
+            // 此时触发成功的操作
+            handlePopWindowParseSuccess();
             Intent intent = new Intent(mContext, DialogActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(UIProperty.TAG, uuid);
@@ -180,11 +192,6 @@ public class DynamicViewJsonBuilder {
             if (templateJson != null) {
                 LinearLayoutDynamic linearLayoutDynamic = createSubView(context, templateJson, true);
                 if (!mIsControlGroup && linearLayoutDynamic != null && mImageSucceed) {// View 创建成功，并且图片没有加载失败，并且不是对照组
-                    SFTrackHelper.trackPlanPopupDisplay(this.mTitle, this.mContent, this.mImageUrl, true, "", mJsonPlan);
-                    PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
-                    if (internalWindowListener != null) {
-                        internalWindowListener.onPopupLoadSuccess(String.valueOf(mPlanId));
-                    }
                     return handleMaskLayout(context, linearLayoutDynamic, propertyJson);
                 }
             }
@@ -318,6 +325,21 @@ public class DynamicViewJsonBuilder {
             SFLog.printStackTrace(ex);
         }
         return null;
+    }
+
+    /**
+     * 如果弹窗解析成功
+     */
+    private void handlePopWindowParseSuccess() {
+        SFTrackHelper.trackPlanPopupDisplay(this.mTitle, this.mContent, this.mImageUrl, true, "", mJsonPlan);
+        PopupListener popupListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getWindowListener();
+        if (popupListener != null) {
+            popupListener.onPopupLoadSuccess(String.valueOf(mPlanId));
+        }
+        PopupListener internalWindowListener = ((SensorsFocusAPI) SensorsFocusAPI.shareInstance()).getInternalWindowListener();
+        if (internalWindowListener != null) {
+            internalWindowListener.onPopupLoadSuccess(String.valueOf(mPlanId));
+        }
     }
 
     private void toastInPreview() {

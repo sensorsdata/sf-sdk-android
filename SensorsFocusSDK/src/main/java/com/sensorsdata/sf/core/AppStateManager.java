@@ -19,7 +19,11 @@ package com.sensorsdata.sf.core;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+
+import com.sensorsdata.sf.ui.view.DialogActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,8 @@ public class AppStateManager implements Application.ActivityLifecycleCallbacks {
     private int mActivityCount;
     private boolean mAppInForeground;
     private boolean mResumeFromBackground;
+    private boolean isActivityFinishing = false;
+    private final String IGNORE_DIALOG_ACTIVITY = DialogActivity.class.getCanonicalName();
     private List<AppStateChangedListener> mAppStateChangedListener = new ArrayList<>();
 
     public interface AppStateChangedListener {
@@ -53,6 +59,9 @@ public class AppStateManager implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityStarted(Activity activity) {
+        if (isDialogActivity(activity)) {
+            return;
+        }
         mActivityCount++;
         if (!mAppInForeground) {
             mAppInForeground = true;
@@ -67,19 +76,32 @@ public class AppStateManager implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityResumed(Activity activity) {
-
+        if (isDialogActivity(activity)) {
+            return;
+        }
+        isActivityFinishing = false;
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
+        if (isDialogActivity(activity)) {
+            return;
+        }
 
+        if (activity.isFinishing()) {
+            isActivityFinishing = true;
+        }
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
+        if (isDialogActivity(activity)) {
+            return;
+        }
         mActivityCount--;
         if (mActivityCount == 0) {
             mAppInForeground = false;
+            activity.getApplicationContext().sendBroadcast(new Intent("com.sensorsdata.sf.close.DialogActivity"));
             for (AppStateChangedListener appStateChangedListener : mAppStateChangedListener) {
                 appStateChangedListener.onEnterBackground();
             }
@@ -94,5 +116,13 @@ public class AppStateManager implements Application.ActivityLifecycleCallbacks {
     @Override
     public void onActivityDestroyed(Activity activity) {
 
+    }
+
+    private boolean isDialogActivity(Activity activity) {
+        return !TextUtils.isEmpty(IGNORE_DIALOG_ACTIVITY) && IGNORE_DIALOG_ACTIVITY.equals(activity.getClass().getCanonicalName());
+    }
+
+    public boolean isActivityFinishing() {
+        return isActivityFinishing;
     }
 }

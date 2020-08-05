@@ -18,6 +18,7 @@
 package com.sensorsdata.sf.core.utils;
 
 public class TipUtils {
+    public static final int ACTIVITY_IN_BACKGROUND_FINISH = 1;
     public static final int IMAGE_LOAD_FAILED = 1000;
     public static final int JSON_ERROR = 1001;
 
