@@ -48,19 +48,8 @@ public class ImageLoader {
     private ImageLoader(Context context) {
         if (instance == null) {
             try {
-                int maxSize = (int) (Runtime.getRuntime().freeMemory() / 2);
-                mBitmapCache = new LruCache<String, Bitmap>(maxSize) {
-                    @Override
-                    protected int sizeOf(String key, Bitmap value) {
-                        return value.getRowBytes() * value.getHeight();
-                    }
-                };
-                final String diskCacheDir = context.getCacheDir().getPath() + File.separator + TAG;
-                File cacheFile = new File(diskCacheDir);
-                if (!cacheFile.exists()) {
-                    cacheFile.mkdirs();
-                }
-                mDiskLruCache = DiskLruCache.open(cacheFile, 1, 1, 10 * 1024 * 1024);
+                initBitmapCache();
+                initBitmapDiskCache(context);
                 executorService = Executors.newSingleThreadExecutor();
             } catch (Exception ex) {
                 SFLog.printStackTrace(ex);
@@ -83,16 +72,19 @@ public class ImageLoader {
      */
     public Bitmap loadBitmap(String url) {
         try {
-            Bitmap bitmap = mBitmapCache.get(url);
-            if (bitmap != null) {
-                SFLog.d(TAG, "「 " + url + "」loadBitmap from cache succeed.");
-                return bitmap;
+            Bitmap bitmap;
+            if (mBitmapCache != null) {
+                bitmap = mBitmapCache.get(url);
+                if (bitmap != null) {
+                    SFLog.d(TAG, "「 " + url + "」loadBitmap from cache succeed.");
+                    return bitmap;
+                }
             }
 
             bitmap = loadBitmapFromDisk(url);
             if (bitmap != null) {
                 SFLog.d(TAG, "「 " + url + "」loadBitmap from disk succeed.");
-                mBitmapCache.put(url, bitmap);
+                saveBitmapInCache(url, bitmap);
                 return bitmap;
             }
 
@@ -100,7 +92,7 @@ public class ImageLoader {
             bitmap = bitmapFuture.get();
             if (bitmap != null) {
                 SFLog.d(TAG, "「 " + url + "」loadBitmap from network succeed.");
-                mBitmapCache.put(url, bitmap);
+                saveBitmapInCache(url, bitmap);
             } else {
                 SFLog.d(TAG, "「 " + url + "」loadBitmap from network failed.");
             }
@@ -157,9 +149,6 @@ public class ImageLoader {
         }
     }
 
-    /**
-     * save image
-     */
     private void saveStreamDiskLruCache(String imageUrl, byte[] data) {
         try {
             String imageKey = hashKeyForDisk(imageUrl);
@@ -176,15 +165,50 @@ public class ImageLoader {
         }
     }
 
+    private void saveBitmapInCache(String url, Bitmap bitmap) {
+        if (mBitmapCache != null) {
+            mBitmapCache.put(url, bitmap);
+        }
+    }
+
+    private void initBitmapCache() {
+        try {
+            int maxSize = (int) (Runtime.getRuntime().maxMemory() / 8);
+            mBitmapCache = new LruCache<String, Bitmap>(maxSize) {
+                @Override
+                protected int sizeOf(String key, Bitmap value) {
+                    return value.getRowBytes() * value.getHeight();
+                }
+            };
+        } catch (Exception ex) {
+            SFLog.printStackTrace(ex);
+        }
+    }
+
+    private void initBitmapDiskCache(Context context ) {
+        try {
+            final String diskCacheDir = context.getCacheDir().getPath() + File.separator + TAG;
+            File cacheFile = new File(diskCacheDir);
+            if (!cacheFile.exists()) {
+                cacheFile.mkdirs();
+            }
+            mDiskLruCache = DiskLruCache.open(cacheFile, 1, 1, 10 * 1024 * 1024);
+        } catch (Exception ex) {
+            SFLog.printStackTrace(ex);
+        }
+    }
+
     /**
      * load Bitmap from DiskLruCache
      */
     private Bitmap loadBitmapFromDisk(String imageUrl) {
         try {
-            String imageKey = hashKeyForDisk(imageUrl);
-            DiskLruCache.Snapshot snapshot = mDiskLruCache.get(imageKey);
-            if (snapshot != null) {
-                return BitmapFactory.decodeStream(snapshot.getInputStream(0));
+            if (mDiskLruCache != null) {
+                String imageKey = hashKeyForDisk(imageUrl);
+                DiskLruCache.Snapshot snapshot = mDiskLruCache.get(imageKey);
+                if (snapshot != null) {
+                    return BitmapFactory.decodeStream(snapshot.getInputStream(0));
+                }
             }
         } catch (Exception ex) {
             SFLog.printStackTrace(ex);
