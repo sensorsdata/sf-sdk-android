@@ -27,14 +27,14 @@ public class Window {
     /**
      * 秒、分钟、小时, nature 只能为 false
      */
-    private static final String UNIT_SECOND = "SECOND";
-    private static final String UNIT_MINUTE = "MINUTE";
-    private static final String UNIT_HOUR = "HOUR";
+    public static final String UNIT_SECOND = "SECOND";
+    public static final String UNIT_MINUTE = "MINUTE";
+    public static final String UNIT_HOUR = "HOUR";
 
     /**
      * 天，周，日，nature 可以为 true 和 false
      */
-    private static final String UNIT_DAY = "DAY";
+    public static final String UNIT_DAY = "DAY";
     public static final String UNIT_WEEK = "WEEK";
     public static final String UNIT_MONTH = "MONTH";
 
@@ -115,7 +115,23 @@ public class Window {
         return startTime;
     }
 
-    @Override
+    public int changeToSecond(int value, String unit) {
+        if (TextUtils.equals(UNIT_MINUTE, unit)) {
+            return changeToSecond(value * 60, UNIT_SECOND);
+        } else if (TextUtils.equals(UNIT_HOUR, unit)) {
+            return changeToSecond(value * 60, UNIT_MINUTE);
+        } else if (TextUtils.equals(UNIT_DAY, unit)) {
+            return changeToSecond(value * 24, UNIT_HOUR);
+        } else if (TextUtils.equals(UNIT_WEEK, unit)) {
+            return changeToSecond(value * 7, UNIT_DAY);
+        } else if (TextUtils.equals(UNIT_MONTH, unit)) {
+            return changeToSecond(value * 30, UNIT_DAY);
+        }
+        //默认返回秒
+        return value;
+    }
+
+
     public String toString() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return "Window{" +

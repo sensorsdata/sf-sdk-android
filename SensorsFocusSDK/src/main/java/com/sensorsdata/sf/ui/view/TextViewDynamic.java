@@ -21,32 +21,43 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
+import android.view.LayoutInflater;
 import android.widget.TextView;
 
+import com.sensorsdata.sf.android.sdk.R;
 import com.sensorsdata.sf.ui.widget.SFTextView;
 
 import org.json.JSONObject;
 
 class TextViewDynamic extends AbstractViewDynamic {
     private String mNameType;
+    private boolean mScrollableY;
+    int maxHeight;
 
     TextViewDynamic(Context context, JSONObject uiJson) {
         super(context, uiJson);
         if (mPropertyJson != null) {
             this.mNameType = mPropertyJson.optString(UIProperty.msgType);
             this.mText = mPropertyJson.optString(UIProperty.text);
+            this.mScrollableY = mPropertyJson.optBoolean(UIProperty.scrollableY);
         }
     }
 
     @Override
     public TextView createView(Activity activity) {
-        mView = new SFTextView(activity, mActionJson);
+        mView = LayoutInflater.from(activity).inflate(R.layout.sensorsfocus_tv, null);
         return (TextView) super.createView(activity);
     }
 
     @Override
     void setViewProperty(JSONObject propertyJson) {
         try {
+            maxHeight = realSize(mContext, mLayoutJson.optString(UIProperty.maxHeight));
+            if (maxHeight > 0) {
+                TextView tv = (TextView) mView;
+                tv.setMaxHeight(maxHeight);
+            }
             ((TextView) mView).setText(mText);
             ((TextView) mView).setTextSize(realFontSize(propertyJson.optString(UIProperty.font)));
             if (propertyJson.has(UIProperty.color)) {
@@ -66,6 +77,10 @@ class TextViewDynamic extends AbstractViewDynamic {
                 int MAX_LINES_DEFAULT_LANDSCAPE = 2;
                 ((TextView) mView).setMaxLines(MAX_LINES_DEFAULT_LANDSCAPE);
                 ((TextView) mView).setEllipsize(TextUtils.TruncateAt.END);
+            }
+            if (mScrollableY) {
+                mView.setVerticalScrollBarEnabled(true);
+                ((TextView) mView).setMovementMethod(ScrollingMovementMethod.getInstance());
             }
             setBackground(mContext, propertyJson);
             mView.setVisibility(visible(propertyJson.optBoolean(UIProperty.isHidden, false)));

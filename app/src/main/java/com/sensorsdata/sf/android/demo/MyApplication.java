@@ -25,8 +25,8 @@ import com.sensorsdata.analytics.android.sdk.SensorsAnalyticsAutoTrackEventType;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.sf.core.SFConfigOptions;
 import com.sensorsdata.sf.core.SensorsFocusAPI;
-import com.sensorsdata.sf.ui.view.SensorsFocusActionModel;
 import com.sensorsdata.sf.ui.listener.PopupListener;
+import com.sensorsdata.sf.ui.view.SensorsFocusActionModel;
 
 import org.json.JSONObject;
 
@@ -46,7 +46,7 @@ public class MyApplication extends Application {
      */
     private void initSensorsDataAPI() {
         // 数据接收的 URL
-        final String SA_SERVER_URL = "https://demosink.focus.sensorsdata.cn/sa?project=default";
+        final String SA_SERVER_URL = "https://sf21-test.debugbox.sensorsdata.cn:4006/sa?project=default";
 
         //设置 SAConfigOptions，传入数据接收地址 SA_SERVER_URL
         SAConfigOptions saConfigOptions = new SAConfigOptions(SA_SERVER_URL);
@@ -64,7 +64,7 @@ public class MyApplication extends Application {
     }
 
     private void initSensorsFocusApi() {
-        final String apiBaseUrl = "https://demosfo.focus.sensorsdata.cn/api/v2";
+        final String apiBaseUrl = "https://apimapping.debugbox.sensorsdata.cn/debugbox/sfo21-test/8202/api/v2/";
         SensorsFocusAPI.startWithConfigOptions(this, new SFConfigOptions(apiBaseUrl)
                 .setPopupListener(new PopupListener() {
                     /**

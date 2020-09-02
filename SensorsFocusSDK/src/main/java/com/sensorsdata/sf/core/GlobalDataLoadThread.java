@@ -86,7 +86,7 @@ class GlobalDataLoadThread extends HandlerThread implements AppStateManager.AppS
                     //测试 5 秒更新
                     //sendEmptyMessageDelayed(MSG_LOAD_REMOTE_POPUP_PLANS, 5000);
                     //定时更新计划
-                    sendEmptyMessageDelayed(MSG_LOAD_REMOTE_POPUP_PLANS, mGlobalData == null ? GLOBAL_DATA_FLUSH_INTERVAL : Math.max(mGlobalData.configPullIntervalMs, GLOBAL_DATA_FLUSH_INTERVAL));
+                    sendEmptyMessageDelayed(MSG_LOAD_REMOTE_POPUP_PLANS, mGlobalData == null || mGlobalData.configPullIntervalMs <= 0 ? GLOBAL_DATA_FLUSH_INTERVAL : mGlobalData.configPullIntervalMs);
                 } else if (msg.what == MSG_DISTINCT_ID_CHANGED) {
                     if (mGlobalData != null) {
                         if (mGlobalData.popupPlans != null) {

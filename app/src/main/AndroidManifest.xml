@@ -24,7 +24,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:host="popupwindow"
-                    android:scheme="sf20191010nb" />
+                    android:scheme="sa7de51f1a" />
             </intent-filter>
         </activity>
     </application>

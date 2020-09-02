@@ -56,7 +56,7 @@ abstract class AbstractViewDynamic implements IViewDynamic {
     /**
      * 布局信息
      */
-    private JSONObject mLayoutJson;
+    protected JSONObject mLayoutJson;
     /**
      * 控件属性信息
      */
@@ -94,7 +94,7 @@ abstract class AbstractViewDynamic implements IViewDynamic {
             return mView;
         } catch (Exception ex) {
             SFLog.printStackTrace(ex);
-            return  null;
+            return null;
         }
     }
 
@@ -148,6 +148,7 @@ abstract class AbstractViewDynamic implements IViewDynamic {
             if (height == 0) {
                 height = LinearLayout.LayoutParams.WRAP_CONTENT;
             }
+
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
             layoutParams.gravity = align;
             JSONObject jsonObject = layoutJson.optJSONObject(UIProperty.margin);

@@ -22,6 +22,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.sensorsdata.sf.android.sdk.R;
+
 import org.json.JSONObject;
 
 /**
@@ -31,18 +33,23 @@ public class SFTextView extends TextView {
     private boolean isInterceptTouchEvent;
 
     public SFTextView(Context context, JSONObject actionJson) {
-        this(context, null, -1);
-        isInterceptTouchEvent = actionJson == null;
+        this(context, null, R.style.ViewWithScrollbars);
+        setActionJson(actionJson);
     }
 
     public SFTextView(Context context, AttributeSet attrs) {
-        this(context, attrs, -1);
+        this(context, attrs, R.style.ViewWithScrollbars);
     }
 
     public SFTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.setBackgroundDrawable(null);
     }
+
+    public void setActionJson(JSONObject actionJson) {
+        isInterceptTouchEvent = actionJson == null;
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {

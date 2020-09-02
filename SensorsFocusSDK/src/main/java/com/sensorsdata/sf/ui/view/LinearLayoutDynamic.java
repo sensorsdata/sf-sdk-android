@@ -19,14 +19,18 @@ package com.sensorsdata.sf.ui.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.sensorsdata.sf.core.utils.SFLog;
+import com.sensorsdata.sf.ui.utils.ImageLoader;
 import com.sensorsdata.sf.ui.utils.SizeUtil;
 import com.sensorsdata.sf.ui.widget.SFLinearLayout;
-import com.sensorsdata.sf.ui.widget.SFTextView;
 
 import org.json.JSONObject;
 
@@ -39,6 +43,11 @@ final class LinearLayoutDynamic extends AbstractViewDynamic {
     private Queue<AbstractViewDynamic> childViews;
     private JSONObject mUIJson;
 
+    private static final String TAG = "LinearLayoutDynamic";
+    private String mImageUrl;
+    private Bitmap bitmap;
+    private boolean isImageLoaded = true;
+
     LinearLayoutDynamic(Context context, boolean isOuterView, JSONObject uiJson) {
         super(context, uiJson);
         try {
@@ -47,10 +56,26 @@ final class LinearLayoutDynamic extends AbstractViewDynamic {
             childViews = new ArrayDeque<>();
             if (mPropertyJson != null) {
                 cornerRadius = realSize(context, mPropertyJson.optString(UIProperty.cornerRadius));
+                mImageUrl = mPropertyJson.optString(UIProperty.backgroundImage);
+                if (!TextUtils.isEmpty(mImageUrl)) {
+                    bitmap = ImageLoader.getInstance(context).loadBitmap(mImageUrl);
+                    if (bitmap == null) {
+                        isImageLoaded = false;
+                        SFLog.d(TAG, mImageUrl + ",Image load failed.");
+                    }
+                }
             }
         } catch (Exception ex) {
             SFLog.printStackTrace(ex);
         }
+    }
+
+    String getImageUrl() {
+        return mImageUrl;
+    }
+
+    boolean isImageLoaded() {
+        return isImageLoaded;
     }
 
     @Override
@@ -66,11 +91,34 @@ final class LinearLayoutDynamic extends AbstractViewDynamic {
     }
 
     @Override
+    void setBackground(Context context, JSONObject jsonObject) {
+        super.setBackground(context, jsonObject);
+        if (jsonObject.has(UIProperty.backgroundImage)) {
+            String url = jsonObject.optString(UIProperty.backgroundImage);
+            ImageLoader imageLoader = ImageLoader.getInstance(mContext);
+            if (imageLoader == null) {
+                return;
+            }
+            Bitmap bitmap = imageLoader.loadBitmap(url);
+            if (bitmap == null) {
+                return;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mView.setBackground(new BitmapDrawable(mContext.getResources(), bitmap));
+            } else {
+                mView.setBackgroundDrawable(new BitmapDrawable(mContext.getResources(), bitmap));
+            }
+        }
+    }
+
+    @Override
     void setViewProperty(JSONObject propertyJson) {
         try {
-            ((LinearLayout) mView).setGravity(align(propertyJson.optString(UIProperty.textAlign)));
-            setBackground(mContext, propertyJson);
-            mView.setVisibility(visible(propertyJson.optBoolean(UIProperty.isHidden, false)));
+            // 针对最外层的 LinearLayout 没有 property 属性的问题，需要单独判断
+            if (propertyJson != null) {
+                setBackground(mContext, propertyJson);
+                mView.setVisibility(visible(propertyJson.optBoolean(UIProperty.isHidden, false)));
+            }
         } catch (Exception ex) {
             // ignore
         }

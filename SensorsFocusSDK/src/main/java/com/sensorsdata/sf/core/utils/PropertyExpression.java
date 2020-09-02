@@ -120,28 +120,66 @@ public class PropertyExpression {
             if (property == null) {
                 return TextUtils.equals(function, NOT_SET);
             } else if (TextUtils.equals(function, EQUAL)) {
+                boolean isStringProperty = property instanceof String;
+                boolean isNumberProperty = property instanceof Number;
                 for (Object param : params) {
-                    if (param instanceof CharSequence) {
-                        if (TextUtils.equals((String) param, (String) property)) {
-                            return true;
+                    if (isStringProperty) {
+                        if (param instanceof CharSequence) {
+                            if (TextUtils.equals((String) param, (String) property)) {
+                                return true;
+                            }
+                        } else if (param instanceof Number) {
+                            if (TextUtils.equals(param.toString(), (String) property)) {
+                                return true;
+                            }
                         }
-                    } else if (param instanceof Number) {
-                        double doubleParam = ((Number) param).doubleValue();
-                        if (doubleParam == (double) property) {
-                            return true;
+                    } else if (isNumberProperty) {
+                        if (param instanceof Number) {
+                            //将 param/property 转成 float 值，然后 乘以 1000，再强转成 long ，即保留3位小数点，然后再进行比较
+                            long longParam = getConvertLongValue((Number) param);
+                            long longProperty = getConvertLongValue((Number) property);
+                            if (longParam == longProperty) {
+                                return true;
+                            }
+                        } else if (param instanceof String) {
+                            float floatParam = Float.parseFloat((String) param);
+                            long longParam = (long) (floatParam * 1000);
+                            long longProperty = getConvertLongValue((Number) property);
+                            if (longParam == longProperty) {
+                                return true;
+                            }
                         }
                     }
                 }
             } else if (TextUtils.equals(function, NOT_EQUAL)) {
+                boolean isStringProperty = property instanceof String;
+                boolean isNumberProperty = property instanceof Number;
                 for (Object param : params) {
-                    if (param instanceof String) {
-                        if (TextUtils.equals((String) param, (String) property)) {
-                            return false;
+                    if (isStringProperty) {
+                        if (param instanceof CharSequence) {
+                            if (TextUtils.equals((String) param, (String) property)) {
+                                return false;
+                            }
+                        } else if (param instanceof Number) {
+                            if (TextUtils.equals(param.toString(), (String) property)) {
+                                return false;
+                            }
                         }
-                    } else if (param instanceof Number) {
-                        double doubleParam = ((Number) param).doubleValue();
-                        if (doubleParam == (double) param) {
-                            return false;
+                    } else if (isNumberProperty) {
+                        if (param instanceof Number) {
+                            //将 param/property 转成 float 值，然后 乘以 1000，再强转成 long ，即保留3位小数点，然后再进行比较
+                            long longParam = getConvertLongValue((Number) param);
+                            long longProperty = getConvertLongValue((Number) property);
+                            if (longParam == longProperty) {
+                                return false;
+                            }
+                        } else if (param instanceof String) {
+                            float floatParam = Float.parseFloat((String) param);
+                            long longParam = (long) (floatParam * 1000);
+                            long longProperty = getConvertLongValue((Number) property);
+                            if (longParam == longProperty) {
+                                return false;
+                            }
                         }
                     }
                 }
@@ -212,26 +250,32 @@ public class PropertyExpression {
             } else if (TextUtils.equals(function, LESS)) {
                 //规则中给的 params 是字符串列表类型
                 if (property instanceof Number) {
-                    double doubleProperty = ((Number) property).doubleValue();
+                    long longProperty = getConvertLongValue((Number) property);
                     String param = (String) params.get(0);
-                    double doubleParam = Double.parseDouble(param);
-                    return doubleProperty < doubleParam;
+                    float floatParam = Float.parseFloat(param);
+                    long longParam = getConvertLongValue(floatParam);
+                    return longProperty < longParam;
                 }
             } else if (TextUtils.equals(function, GREATER)) {
                 //规则中给的 params 是字符串列表类型
                 if (property instanceof Number) {
-                    double doubleProperty = ((Number) property).doubleValue();
+                    long longProperty = getConvertLongValue((Number) property);
                     String param = (String) params.get(0);
-                    double doubleParam = Double.parseDouble(param);
-                    return doubleProperty > doubleParam;
+                    float floatParam = Float.parseFloat(param);
+                    long longParam = getConvertLongValue(floatParam);
+                    return longProperty > longParam;
                 }
             } else if (TextUtils.equals(function, BETWEEN)) {
                 if (property instanceof Number) {
-                    double doubleProperty = ((Number) property).doubleValue();
+                    long longProperty = getConvertLongValue((Number) property);
                     //规则中给的 params 是字符串列表类型
                     String param1 = (String) params.get(0);
+                    float floatParam1 = Float.parseFloat(param1);
+                    long longParam1 = getConvertLongValue(floatParam1);
                     String param2 = (String) params.get(1);
-                    return doubleProperty > Double.parseDouble(param1) && doubleProperty < Double.parseDouble(param2);
+                    float floatParam2 = Float.parseFloat(param2);
+                    long longParam2 = getConvertLongValue(floatParam2);
+                    return longProperty >= longParam1 && longProperty <= longParam2;
                 }
             } else if (TextUtils.equals(function, CONTAIN)) {
                 if (property instanceof String) {
@@ -281,6 +325,10 @@ public class PropertyExpression {
             SFLog.printStackTrace(e);
         }
         return false;
+    }
+
+    private static long getConvertLongValue(Number value) {
+        return (long) (value.floatValue() * 1000);
     }
 
 }

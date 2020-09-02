@@ -21,6 +21,7 @@ interface UIProperty {
     String TAG = "UIProperty";
     String id = "id";
     String msgType = "msgType";
+    String scrollableY = "scrollableY";
     String properties = "properties";
     String closeEnabled = "closeEnabled";
     String closeStyle = "closeStyle";
@@ -28,6 +29,7 @@ interface UIProperty {
     String localImageName = "localImageName";
     String width = "width";
     String height = "height";
+    String maxHeight = "maxHeight";
     String maskColor = "maskColor";
     String maskCloseEnabled = "maskCloseEnabled";
     String template = "template";
@@ -85,4 +87,5 @@ interface UIProperty {
     String action_extra = "extra";
     String ui_json = "ui_json";
     String plan_id = "plan_id";
+    String copied_tip = "copied_tip";
 }

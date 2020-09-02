@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import com.sensorsdata.sf.core.utils.SFLog;
 import com.sensorsdata.sf.core.utils.Utils;
 import com.sensorsdata.sf.core.window.Limit;
+import com.sensorsdata.sf.core.window.Window;
 
 import org.json.JSONArray;
 
@@ -30,8 +31,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import com.sensorsdata.sf.core.window.Window;
 
 /**
  * 全局弹窗限制（所有计划 5 天内最多弹 4 次且 1 天最多弹 2 次）
@@ -98,20 +97,24 @@ public class GlobalPopupLimit {
             calendar.setTimeInMillis(startTime);
             for (Limit limit : limits) {
                 limit.triggerCount = 0;
-                calendar.set(Calendar.HOUR_OF_DAY, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                if (TextUtils.equals(Window.UNIT_WEEK, limit.unit)) {
-                    calendar.setFirstDayOfWeek(Calendar.MONDAY);
-                    calendar.set(Calendar.DAY_OF_WEEK, 2);
-                    //回退几周
-                    calendar.add(Calendar.WEEK_OF_YEAR, -(limit.value - 1));
-                } else if (TextUtils.equals(Window.UNIT_MONTH, limit.unit)) {
-                    calendar.add(Calendar.MONTH, 0);
-                    calendar.set(Calendar.DAY_OF_MONTH, 1);
-                    calendar.add(Calendar.MONTH, -(limit.value - 1));
+                if (limit.natural) {
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    if (TextUtils.equals(Window.UNIT_WEEK, limit.unit)) {
+                        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+                        calendar.set(Calendar.DAY_OF_WEEK, 2);
+                        //回退几周
+                        calendar.add(Calendar.WEEK_OF_YEAR, -(limit.value - 1));
+                    } else if (TextUtils.equals(Window.UNIT_MONTH, limit.unit)) {
+                        calendar.add(Calendar.MONTH, 0);
+                        calendar.set(Calendar.DAY_OF_MONTH, 1);
+                        calendar.add(Calendar.MONTH, -(limit.value - 1));
+                    } else {
+                        calendar.add(Calendar.DAY_OF_YEAR, -(limit.value - 1));
+                    }
                 } else {
-                    calendar.add(Calendar.DAY_OF_YEAR, -(limit.value - 1));
+                    calendar.add(Calendar.SECOND, -limit.changeToSecond(limit.value, limit.unit));
                 }
                 limit.before = calendar.getTimeInMillis();
             }

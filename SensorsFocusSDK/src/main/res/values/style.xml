@@ -31,4 +31,8 @@
         <item name="android:taskToBackEnterAnimation">@null</item>
         <item name="android:taskToBackExitAnimation">@null</item>
     </style>
+
+    <style name="ViewWithScrollbars">
+        <item name="android:scrollbars">vertical</item>
+    </style>
 </resources>

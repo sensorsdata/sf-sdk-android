@@ -42,7 +42,7 @@ final class ImageViewDynamic extends AbstractViewDynamic {
     // 父控件中只有一个图片控件时，特指仅有图片的布局，要处理所有四角圆角，否则只处理顶部两个圆角
     private boolean mIsCornerAll;
 
-    ImageViewDynamic(Context context, String type, int cornerRadius,boolean isCornerAll, JSONObject uiJson) {
+    ImageViewDynamic(Context context, String type, int cornerRadius, boolean isCornerAll, JSONObject uiJson) {
         super(context, uiJson);
         this.mType = type;
         this.cornerRadius = cornerRadius;

@@ -231,8 +231,8 @@ public class DynamicViewJsonBuilder {
             AbstractViewDynamic dynamic;
             LinearLayoutDynamic linearLayoutDynamic = new LinearLayoutDynamic(context, isOuterView, subViewJson);
             int cornerRadius = linearLayoutDynamic.cornerRadius;
-            JSONArray subViewsArray = subViewJson.getJSONArray(UIProperty.subviews);
-            if (subViewsArray.length() > 0) {
+            JSONArray subViewsArray = subViewJson.optJSONArray(UIProperty.subviews);
+            if (subViewsArray != null && subViewsArray.length() > 0) {
                 JSONObject jsonObject;
                 int subViews = subViewsArray.length();
                 for (int index = 0; index < subViews; index++) {
@@ -240,6 +240,10 @@ public class DynamicViewJsonBuilder {
                     String type = jsonObject.optString(UIProperty.type);
                     if (isViewGroup(type)) {
                         dynamic = createSubView(context, jsonObject, false);
+                        if (dynamic != null && !((LinearLayoutDynamic) dynamic).isImageLoaded()) {
+                            mImageSucceed = false;
+                            errorUrl = ((LinearLayoutDynamic) dynamic).getImageUrl();
+                        }
                     } else {
                         dynamic = buildSubView(context, type, jsonObject, cornerRadius, isOuterView);
                     }

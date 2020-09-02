@@ -75,14 +75,15 @@ class DynamicViewHelper {
                 this.mContent = textViewDynamic.getText();
             }
             final JSONObject actionJson = textViewDynamic.getActionJson();
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (actionJson != null) {
+
+            if (actionJson != null) {
+                textView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         handleAction(UIProperty.type_label, String.valueOf(textView.getText()), actionJson, activity);
                     }
-                }
-            });
+                });
+            }
             return textView;
         } catch (Exception ex) {
             SFLog.printStackTrace(ex);
@@ -94,14 +95,14 @@ class DynamicViewHelper {
         try {
             final TextView textView = linkViewDynamic.createView(activity);
             final JSONObject actionJson = linkViewDynamic.getActionJson();
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (actionJson != null) {
+            if (actionJson != null) {
+                textView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         handleAction(UIProperty.type_link, String.valueOf(textView.getText()), actionJson, activity);
                     }
-                }
-            });
+                });
+            }
 
             return textView;
         } catch (Exception ex) {
@@ -189,6 +190,7 @@ class DynamicViewHelper {
                                 maskJson.put("id", maskViewDynamic.getActionId());
                                 SFTrackHelper.trackPlanPopupClick(mTitle, mContent, UIProperty.type_mask, "", mImageUrl, maskJson, mJsonPlan);
                                 if (mPopupListener != null) {
+                                    maskJson.put(UIProperty.type, UIProperty.action_type_close);
                                     mPopupListener.onPopupClick(mPlanId, getActionModel(maskJson));
                                     mPopupListener.onPopupClose(String.valueOf(mPlanId));
                                 }
@@ -266,7 +268,12 @@ class DynamicViewHelper {
                     return SensorsFocusActionModel.OPEN_LINK;
                 case UIProperty.action_type_copy:
                     SensorsFocusActionModel.COPY.setValue(value);
-                    SensorsFocusActionModel.COPY.setExtra(actionJson.optJSONObject(UIProperty.action_extra));
+                    JSONObject extraObject = actionJson.optJSONObject(UIProperty.action_extra);
+                    if (extraObject == null) {
+                        extraObject = new JSONObject();
+                    }
+                    extraObject.put(UIProperty.copied_tip, actionJson.optString(UIProperty.copied_tip));
+                    SensorsFocusActionModel.COPY.setExtra(extraObject);
                     return SensorsFocusActionModel.COPY;
                 case UIProperty.action_type_close:
                     SensorsFocusActionModel.CLOSE.setValue(value);

@@ -20,10 +20,7 @@ package com.sensorsdata.sf.core;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
-import android.widget.TextView;
 
-import com.sensorsdata.analytics.android.sdk.BuildConfig;
 import com.sensorsdata.analytics.android.sdk.SALog;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.analytics.android.sdk.listener.SAEventListener;
@@ -33,7 +30,7 @@ import com.sensorsdata.sf.core.http.HttpRequestHelper;
 import com.sensorsdata.sf.core.utils.SFLog;
 import com.sensorsdata.sf.core.utils.Utils;
 import com.sensorsdata.sf.ui.listener.PopupListener;
-import com.sensorsdata.sf.ui.view.DynamicViewJsonBuilder;
+import com.sensorsdata.sf.ui.utils.ImageLoader;
 
 import org.json.JSONObject;
 
@@ -41,6 +38,8 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SensorsFocusAPI implements ISensorsFocusAPI {
     private static final String TAG = "SensorsFocusAPI";
@@ -116,7 +115,8 @@ public class SensorsFocusAPI implements ISensorsFocusAPI {
     }
 
     PopupListener internalWindowListener;
-    public void setInternalWindowListener(PopupListener popupListener){
+
+    public void setInternalWindowListener(PopupListener popupListener) {
         this.internalWindowListener = popupListener;
     }
 
@@ -144,7 +144,27 @@ public class SensorsFocusAPI implements ISensorsFocusAPI {
             public void loadSuccess(JSONObject data, GlobalData globalData) {
                 mGlobalData = globalData;
                 mAppStateManager.addAppStateChangedListener(mGlobalData);
-                DynamicViewJsonBuilder.preLoadImage(mContext, globalData);
+                try {
+                    String regex = "(?<=(\"image\":\")|(\"backgroundImage\":\")).*?(?=(\"))";
+                    List<PopupPlan> popupPlans = globalData.popupPlans;
+                    if (popupPlans == null) {
+                        return;
+                    }
+                    for (PopupPlan p : popupPlans) {
+                        try {
+                            String content = p.popupWindowContent.optString("content");
+                            Matcher matcher = Pattern.compile(regex).matcher(content);
+                            while (matcher.find()) {
+                                String ret = matcher.group(0);
+                                ImageLoader.getInstance(mContext).loadBitmap(ret);
+                            }
+                        } catch (Exception e) {
+                            SALog.printStackTrace(e);
+                        }
+                    }
+                } catch (Exception e) {
+                    SALog.printStackTrace(e);
+                }
             }
         }).start();
         if (mAppStateManager != null) {
