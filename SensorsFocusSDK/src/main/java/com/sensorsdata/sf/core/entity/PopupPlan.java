@@ -16,7 +16,6 @@
  */
 package com.sensorsdata.sf.core.entity;
 
-import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.sensorsdata.sf.core.window.ConvertWindow;
@@ -89,7 +88,7 @@ public class PopupPlan {
      * @return 是否过期
      */
     public boolean isExpired() {
-        return SystemClock.currentThreadTimeMillis() >= expireAt;
+        return System.currentTimeMillis() >= expireAt;
     }
 
     /**
