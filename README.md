@@ -15,7 +15,7 @@ Android 4.0 及以上。
 
 ## 集成文档
 
-请联系技术支持人员。
+[Android 弹窗集成文档](https://manual.sensorsdata.cn/sf/latest/popup_integration_android-22256846.html)
 
 ## 讨论
 
