@@ -1,6 +1,6 @@
 /*
  * Created by dengshiwei on 2020/02/24.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2022 Sensors Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,50 @@
 package com.sensorsdata.sf.android.demo;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
-import com.sensorsdata.sf.android.R;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.Date;
-
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private static ArrayList<String> list;
+
+    static {
+        list = new ArrayList<>();
+        list.add("仅 Gif 图片");
+        list.add("Gif 背景图 +文字 +按钮");
+        list.add("仅图片");
+        list.add("图片+按钮");
+        list.add("图片+文字+按钮");
+        list.add("背景图+按钮");
+        list.add("背景图+文字+按钮");
+        list.add("背景图+文字");
+        list.add("文字+按钮");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        findViewById(R.id.btn_picture).setOnClickListener(this);
-        findViewById(R.id.btn_2button).setOnClickListener(this);
-        findViewById(R.id.btn_picture_2button).setOnClickListener(this);
-        findViewById(R.id.btn_pictureButton).setOnClickListener(this);
-        findViewById(R.id.btn_text_button).setOnClickListener(this);
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        for (int i = 0; i < list.size(); i++) {
+            Button button = new Button(this);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.gravity = Gravity.CENTER;
+            layoutParams.bottomMargin = 25;
+            button.setLayoutParams(layoutParams);
+            button.setId(i);
+            button.setText(list.get(i));
+            linearLayout.addView(button);
+            button.setOnClickListener(this);
+        }
+        setContentView(linearLayout);
     }
 
     @Override
@@ -48,46 +69,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
     }
 
-   void trackShareSucEvent(){
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("bb", "  cc  ");
-            jsonObject.put("aa", new Date());
-            jsonObject.put("dd", "");
-            jsonObject.put("number", 5);
-            JSONArray a = new JSONArray();
-            a.put("aa");
-            a.put("bb");
-            jsonObject.put("ee", a);
-            SensorsDataAPI.sharedInstance().track("shareSuccess", jsonObject);
-        } catch (Exception e) {
-
-        }
-    }
-
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_picture:
-                //PopDialogUtils.getInstance().pictureDialog(this);
-                SensorsDataAPI.sharedInstance().track("$WebClick");
-                break;
-            case R.id.btn_2button:
-                PopDialogUtils.getInstance().picture2ButtonDialog(this);
-                break;
-            case R.id.btn_picture_2button:
-                PopDialogUtils.getInstance().picture2Button2Dialog(this);
-                break;
-            case R.id.btn_pictureButton:
-                SensorsDataAPI.sharedInstance().track("$WebStay");
-                //PopDialogUtils.getInstance().pictureButtonDialog(this);
-                break;
-            case R.id.btn_text_button:
-                trackShareSucEvent();
-                //PopDialogUtils.getInstance().textButtonDialog(this);
-                break;
-            default:
-                break;
+        try {
+            PopDialogUtils.getInstance().pictureDialog(this, v.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
