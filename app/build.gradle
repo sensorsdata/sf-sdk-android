@@ -27,6 +27,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'com.sensorsdata.analytics.android:SensorsAnalyticsSDK:6.0.1'
-    implementation files("libs/SensorsFocusSDK-0.4.8.aar")
+    //implementation 'com.sensorsdata.analytics.android:SensorsAnalyticsSDK:6.0.1'
+    implementation files("libs/SensorsFocusSDK-0.5.0.aar")
+    implementation files("libs/SensorsAnalyticsSDK-6.2.4.aar")
 }
