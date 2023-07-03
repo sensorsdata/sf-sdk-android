@@ -88,6 +88,11 @@ public class MyApplication extends Application {
                     }
 
                     @Override
+                    public void onCampaignClick(SFCampaign sfCampaign) {
+
+                    }
+
+                    @Override
                     public void onCampaignFailed(SFCampaign sfCampaign, int errorCode, String errorMessage) {
                         Log.d(TAG, "SA.campaignFailed : errorCode：" + errorCode
                                 + "，errorMessage：" + errorMessage + "sfCampaign:" +
